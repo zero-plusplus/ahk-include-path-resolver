@@ -1,5 +1,5 @@
 {
-  "name": "ahk-include-path-resolver",
+  "name": "@zero-plusplus/ahk-include-path-resolver",
   "version": "0.5.0",
   "author": "zero-plusplus <git@zero-plusplus.com>",
   "description": "",
