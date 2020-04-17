@@ -1,0 +1,28 @@
+{
+  "name": "ahk-include-path-resolver",
+  "version": "0.5.0",
+  "author": "zero-plusplus <git@zero-plusplus.com>",
+  "description": "",
+  "license": "MIT",
+  "homepage": "https://github.com/zero-plusplus/ahk-include-path-resolver#readme",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "prepare": "yarn build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zero-plusplus/ahk-include-path-resolver.git"
+  },
+  "bugs": {
+    "url": "https://github.com/zero-plusplus/ahk-include-path-resolver/issues"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^2.28.0",
+    "@typescript-eslint/parser": "^2.28.0",
+    "@zero-plusplus/eslint-my-rules": "^1.0.5",
+    "eslint": "^6.8.0",
+    "typescript": "^3.8.3"
+  }
+}
