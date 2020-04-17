@@ -5,7 +5,7 @@
   "description": "",
   "license": "MIT",
   "homepage": "https://github.com/zero-plusplus/ahk-include-path-resolver#readme",
-  "main": "build/index.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
     "prepare": "yarn build"
