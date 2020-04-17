@@ -81,10 +81,10 @@
     semver "^6.3.0"
     tsutils "^3.17.1"
 
-"@zero-plusplus/eslint-my-rules@^1.0.5":
-  version "1.0.5"
-  resolved "https://npm.pkg.github.com/download/@zero-plusplus/eslint-my-rules/1.0.5/9cb1ababefc2696c14b5758de2f51bfbbafc60c7aaaf4a57ac4683282e81c976#79af9cb6a690dcf6e57ff522d71204c8b07376c7"
-  integrity sha512-rt65OwibURDOroetMQYv7dWPXiDjvLgzmXcK9WpxST25/T2ACMP7qYf6eppXlo8sIAwMSH0lRQj3ugxfmUQTNQ==
+"@zero-plusplus/eslint-my-rules@^1.0.6":
+  version "1.0.6"
+  resolved "https://npm.pkg.github.com/download/@zero-plusplus/eslint-my-rules/1.0.6/b2b68fa3ccd37f148c0e1daa7313a2abf80ade523a4c63dac663fcb62527079f#65cd804bffb4c20794410d9c192c6b40778bf96c"
+  integrity sha512-RnJ4cDvDmpIURKTijUsJLl7Fjbk7JYYUFdfFPYE7K+GIU0I3w1LmHggLjqiakaYotMWLN3pVjcQNWmMm/9uuyg==
 
 acorn-jsx@^5.2.0:
   version "5.2.0"
