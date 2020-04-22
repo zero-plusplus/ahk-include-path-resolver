@@ -1,15 +1,21 @@
 {
   "name": "@zero-plusplus/ahk-include-path-resolver",
-  "version": "0.5.2",
+  "version": "1.0.0",
   "author": "zero-plusplus <git@zero-plusplus.com>",
   "description": "",
   "license": "MIT",
   "homepage": "https://github.com/zero-plusplus/ahk-include-path-resolver#readme",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "yarn lint && yarn clean && tsc",
+    "clean": "rimraf dist",
+    "test": "yarn build && mocha -u tdd ./dist/test/",
+    "lint": "eslint ./src/**/*.ts ./test/**/*.ts",
     "prepare": "yarn build"
   },
+  "files": [
+    "dist/src"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/zero-plusplus/ahk-include-path-resolver.git"
@@ -19,10 +25,15 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^13.13.0",
     "@typescript-eslint/eslint-plugin": "^2.28.0",
     "@typescript-eslint/parser": "^2.28.0",
-    "@zero-plusplus/eslint-my-rules": "^1.0.8",
+    "@zero-plusplus/eslint-my-rules": "^1.0.14",
     "eslint": "^6.8.0",
+    "husky": "^4.2.5",
+    "mocha": "^7.1.1",
+    "rimraf": "^3.0.2",
     "typescript": "^3.8.3"
   }
 }
