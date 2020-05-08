@@ -40,7 +40,7 @@ export interface AdditionalInfo {
   readonly overwrite?: SupportVariables;
 }
 export interface ParsedInclude {
-  readonly isOptionMode: boolean;
+  readonly isOptional: boolean;
   readonly isAgainMode: boolean;
   readonly path: string;
 }
@@ -202,10 +202,7 @@ const defaultConversionTable: SupportVariables = {
 };
 
 export default class Resolver {
-  private static readonly includeRegex = new RegExp(`^${[
-    `\\s*#Include(?:|(Again))\\s+(?:|([*]i)\\s+)(?<includePath>[^\\s<>]+)\\s*`,
-    `\\s*#Include(?:|(Again))\\s+(?:|([*]i)\\s+)<(?<libraryPath>\\S+)>\\s*`,
-  ].join('|')}$`, 'ui');
+  private static readonly includeRegex = /\s*#Include(?:|(?<mode>Again))\s+(?:|(?<optional>[*]i)\s+)(?:(?<includePath>[^*\s<>]+)|<(?<libraryPath>[^*\s<>]+)>)\s*/iu;
   public readonly conversionTable: SupportVariables;
   public readonly libraryType: LibraryType;
   constructor({ runtimePath, overwrite, libraryType = 'local', rootPath = '' }: AdditionalInfo) {
@@ -298,20 +295,22 @@ export default class Resolver {
   }
   public parseInclude(includeLine: string): ParsedInclude | null {
     const match = Resolver.includeRegex.exec(includeLine);
-    if (!match) {
+    if (!match?.groups) {
       return null;
     }
-    const [ , again, option, includePath, libraryPath ] = match;
+    const isAgainMode = Boolean(match.groups.mode);
+    const isOptionMode = Boolean(match.groups.optional);
+    const includePath = match.groups.includePath;
+    const libraryPath = match.groups.libraryPath;
 
-
-    let ahkPath = includePath || libraryPath;
+    let filePath = includePath || libraryPath;
     if (libraryPath) {
-      ahkPath = `${this.getLibraryDir(this.libraryType)}${ahkPath}`;
+      filePath = `${this.getLibraryDir(this.libraryType)}/${String(filePath)}.ahk`;
     }
     const parsedInclude = {
-      isAgainMode: Boolean(again),
-      isOptionMode: Boolean(option),
-      path: ahkPath,
+      isAgainMode,
+      isOptional: isOptionMode,
+      path: filePath,
     } as ParsedInclude;
     return parsedInclude;
   }

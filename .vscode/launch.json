@@ -17,31 +17,12 @@
         "./dist/test/"
       ],
 			"outFiles": [
-				"${workspaceFolder}/dist/**/*.js"
+				"${workspaceFolder}/dist/test/**/*.test.js"
       ],
       "preLaunchTask": "yarn build",
       "internalConsoleOptions": "openOnSessionStart",
       "skipFiles": [
         "<node_internals>/**"
-      ]
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Debug AVA test file",
-      "smartStep": true,
-      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/ava",
-      "runtimeArgs": [
-        "debug",
-        "--break",
-        "--serial",
-        "${workspaceFolder}/test/index.ts"
-      ],
-      // "preLaunchTask": "npm: build",
-      "port": 9229,
-      "outputCapture": "std",
-      "skipFiles": [
-        "<node_internals>/**/*.js"
       ]
     }
   ]

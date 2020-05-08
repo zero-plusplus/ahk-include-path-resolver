@@ -69,9 +69,9 @@ suite('Dereference variable', (): void => {
 });
 
 suite('Parse include line', () => {
-  test('For AutoHotkey v1', () => {
-    test('Basic include line', () => {
-      const includeLine = '#Include %A_LineFile%\\..\\otherscripts.ahk';
+  suite('For AutoHotkey v1', () => {
+    test('include line', () => {
+      const includeLine = '#Include %A_LineFile%\\..\\otherscript.ahk';
       const parsedInclude = resolver_v1.parseInclude(includeLine);
       if (parsedInclude === null) {
         assert.fail('Failed parse.');
@@ -79,10 +79,10 @@ suite('Parse include line', () => {
 
       assert.equal(parsedInclude.path, '%A_LineFile%\\..\\otherscript.ahk');
       assert.equal(parsedInclude.isAgainMode, false);
-      assert.equal(parsedInclude.isOptionMode, false);
+      assert.equal(parsedInclude.isOptional, false);
     });
     test('Optional include line', () => {
-      const includeLine = '#Include *i %A_LineFile%\\..\\otherscripts.ahk';
+      const includeLine = '#Include *i %A_LineFile%\\..\\otherscript.ahk';
       const parsedInclude = resolver_v1.parseInclude(includeLine);
       if (parsedInclude === null) {
         assert.fail('Failed parse.');
@@ -90,10 +90,10 @@ suite('Parse include line', () => {
 
       assert.equal(parsedInclude.path, '%A_LineFile%\\..\\otherscript.ahk');
       assert.equal(parsedInclude.isAgainMode, false);
-      assert.equal(parsedInclude.isOptionMode, true);
+      assert.equal(parsedInclude.isOptional, true);
     });
     test('Include again line', () => {
-      const includeLine = '#IncludeAgain %A_LineFile%\\..\\otherscripts.ahk';
+      const includeLine = '#IncludeAgain %A_LineFile%\\..\\otherscript.ahk';
       const parsedInclude = resolver_v1.parseInclude(includeLine);
       if (parsedInclude === null) {
         assert.fail('Failed parse.');
@@ -101,18 +101,51 @@ suite('Parse include line', () => {
 
       assert.equal(parsedInclude.path, '%A_LineFile%\\..\\otherscript.ahk');
       assert.equal(parsedInclude.isAgainMode, true);
-      assert.equal(parsedInclude.isOptionMode, false);
+      assert.equal(parsedInclude.isOptional, false);
     });
-    test('Include again line', () => {
-      const includeLine = '#IncludeAgain <lib>';
+    test('Optional include again line', () => {
+      const includeLine = '#IncludeAgain *i %A_LineFile%\\..\\otherscript.ahk';
       const parsedInclude = resolver_v1.parseInclude(includeLine);
       if (parsedInclude === null) {
         assert.fail('Failed parse.');
       }
 
-      assert.equal(parsedInclude.path, `${resolver_v1.conversionTable.A_WorkingDir}/lib`);
-      assert.equal(parsedInclude.isAgainMode, false);
-      assert.equal(parsedInclude.isOptionMode, false);
+      assert.equal(parsedInclude.path, '%A_LineFile%\\..\\otherscript.ahk');
+      assert.equal(parsedInclude.isAgainMode, true);
+      assert.equal(parsedInclude.isOptional, true);
+    });
+    test('Library include line', () => {
+      const includeLine = '#IncludeAgain <libscript>';
+      const parsedInclude = resolver_v1.parseInclude(includeLine);
+      if (parsedInclude === null) {
+        assert.fail('Failed parse.');
+      }
+
+      assert.equal(parsedInclude.path, `${resolver_v1.getLibraryDir('local')}/libscript.ahk`);
+      assert.equal(parsedInclude.isAgainMode, true);
+      assert.equal(parsedInclude.isOptional, false);
+    });
+    test('Library include again line', () => {
+      const includeLine = '#IncludeAgain <libscript>';
+      const parsedInclude = resolver_v1.parseInclude(includeLine);
+      if (parsedInclude === null) {
+        assert.fail('Failed parse.');
+      }
+
+      assert.equal(parsedInclude.path, `${resolver_v1.getLibraryDir('local')}/libscript.ahk`);
+      assert.equal(parsedInclude.isAgainMode, true);
+      assert.equal(parsedInclude.isOptional, false);
+    });
+    test('Optional library include again line', () => {
+      const includeLine = '#IncludeAgain *i <libscript>';
+      const parsedInclude = resolver_v1.parseInclude(includeLine);
+      if (parsedInclude === null) {
+        assert.fail('Failed parse.');
+      }
+
+      assert.equal(parsedInclude.path, `${resolver_v1.getLibraryDir('local')}/libscript.ahk`);
+      assert.equal(parsedInclude.isAgainMode, true);
+      assert.equal(parsedInclude.isOptional, true);
     });
   });
 });
