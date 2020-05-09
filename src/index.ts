@@ -365,9 +365,10 @@ export default class Resolver {
     try {
       accessSync(targetPath);
 
-      const lines = readFileSync(targetPath, 'utf8').split('\n');
-      lines.forEach((line) => {
-        const filePath = this.resolveByIncludeLine(line);
+      const sourceCode = readFileSync(targetPath, 'utf8');
+      const includeRegex = new RegExp(Resolver.includeRegex.source, 'gui');
+      Array.from(sourceCode.matchAll(includeRegex), (x) => x[0]).forEach((includeLine) => {
+        const filePath = this.resolveByIncludeLine(includeLine);
         if (filePath) {
           includePathList.push(filePath);
 
@@ -376,16 +377,14 @@ export default class Resolver {
             currentPath: filePath,
           });
           includePathList.push(...resolve.extractAllIncludePath(libraryTypes, filePath, _libraryPathList));
-          return;
         }
+      });
 
-        for (const libraryPath of _libraryPathList) {
-          const funcName = path.basename(libraryPath).split('.')[0];
-          const regex = new RegExp(`${funcName}(?:|_[^\\(\\)]+)\\([^\\(\\)]*\\)`, 'ui');
-          if (regex.test(line)) {
-            includePathList.push(libraryPath);
-            break;
-          }
+      _libraryPathList.forEach((libraryPath) => {
+        const funcName = path.basename(libraryPath).split('.')[0];
+        const regex = new RegExp(`${funcName}(?:|_[^\\(\\)]+)\\([^\\(\\)]*\\)`, 'ui');
+        if (regex.test(sourceCode)) {
+          includePathList.push(libraryPath);
         }
       });
     }
