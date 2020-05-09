@@ -36,18 +36,19 @@ const ahkV2RuntimePath = path.resolve('./bin/AutoHotkey_V2_a108_a2fa0498_U64.exe
 const evalBuiltinVariableAhk_v1 = (variableName): string => evalBuiltinVariableAhk(ahkV1RuntimePath, 1, variableName);
 const evalBuiltinVariableAhk_v2 = (variableName): string => evalBuiltinVariableAhk(ahkV2RuntimePath, 2, variableName);
 const targetPath = path.resolve('./*'); // standard input
-const resolver_v1 = new Resolver({
-  runtimePath: ahkV1RuntimePath,
-  rootPath: targetPath,
-  version: 1,
-});
-const resolver_v2 = new Resolver({
-  runtimePath: ahkV2RuntimePath,
-  rootPath: targetPath,
-  version: 2,
-});
+
 
 suite('Dereference variable', (): void => {
+  const resolver_v1 = new Resolver({
+    runtimePath: ahkV1RuntimePath,
+    rootPath: targetPath,
+    version: 1,
+  });
+  const resolver_v2 = new Resolver({
+    runtimePath: ahkV2RuntimePath,
+    rootPath: targetPath,
+    version: 2,
+  });
   test('For AutoHotkey v1', () => {
     for (const variableName of supportVariableNames) {
       const actual = resolver_v1.dereference(variableName);
@@ -70,6 +71,11 @@ suite('Dereference variable', (): void => {
 
 suite('Parse include line', () => {
   suite('For AutoHotkey v1', () => {
+    const resolver_v1 = new Resolver({
+      runtimePath: `${String(process.env.ProgramFiles)}/AutoHotkey/AutoHotkey.exe`,
+      rootPath: `${__dirname}/ahk/LibrariesOfFunction.ahk`,
+      version: 1,
+    });
     test('include line', () => {
       const includeLine = '#Include %A_LineFile%\\..\\otherscript.ahk';
       const parsedInclude = resolver_v1.parseInclude(includeLine);
@@ -146,6 +152,26 @@ suite('Parse include line', () => {
       assert.equal(parsedInclude.path, `${resolver_v1.getLibraryDir('local')}/libscript.ahk`);
       assert.equal(parsedInclude.isAgainMode, true);
       assert.equal(parsedInclude.isOptional, true);
+    });
+  });
+
+  suite('extractAllIncludePath', () => {
+    test('v1', () => {
+      const resolver_v1 = new Resolver({
+        runtimePath: `${String(process.env.ProgramFiles)}/AutoHotkey/AutoHotkey.exe`,
+        rootPath: `${__dirname}/ahk/main.ahk`,
+        version: 1,
+      });
+
+      const sortCallback = (a: string, b: string): number => a.localeCompare(b);
+      const actual = resolver_v1.extractAllIncludePath().sort(sortCallback);
+      const expected = [
+        path.resolve(`${__dirname}/ahk/lib/LocalLib.ahk`),
+        path.resolve(`${__dirname}/ahk/lib/LocalLibClass.ahk`),
+        path.resolve(`${__dirname}/ahk/lib/NestLib.ahk`),
+        path.resolve(`${__dirname}/ahk/otherscript.ahk`),
+      ].sort(sortCallback);
+      assert.deepEqual(actual, expected);
     });
   });
 });

@@ -1,0 +1,4 @@
+﻿LocalLib()
+{
+    msgbox
+}
