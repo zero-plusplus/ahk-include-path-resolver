@@ -164,7 +164,7 @@ suite('Parse include line', () => {
       });
 
       const sortCallback = (a: string, b: string): number => a.localeCompare(b);
-      const actual = resolver_v1.extractAllIncludePath().sort(sortCallback);
+      const actual = resolver_v1.extractAllIncludePath([ 'local' ]).sort(sortCallback);
       const expected = [
         path.resolve(`${__dirname}/ahk/lib/LocalLib.ahk`),
         path.resolve(`${__dirname}/ahk/lib/LocalLibClass.ahk`),

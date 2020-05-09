@@ -1,4 +1,8 @@
-﻿LocalLib()
+﻿LocalLib(a, b)
 {
-    msgbox
+    return a + b
+}
+LocalLib_MsgBox(msg)
+{
+    msgbox %msg%
 }
