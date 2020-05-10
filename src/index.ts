@@ -382,7 +382,7 @@ export default class Resolver {
 
       _libraryPathList.forEach((libraryPath) => {
         const funcName = path.basename(libraryPath).split('.')[0];
-        const regex = new RegExp(`${funcName}(?:|_[^\\(\\)]+)\\([^\\(\\)]*\\)`, 'ui');
+        const regex = new RegExp(`${funcName}(?:|_[^\\(\\)]+)\\(.*\\)`, 'ui');
         if (regex.test(sourceCode)) {
           includePathList.push(libraryPath);
         }
