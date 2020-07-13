@@ -206,7 +206,7 @@ const defaultConversionTable: SupportVariables = {
 
 const defaultConfig = { rootPath: '', libraryType: 'local' };
 export default class Resolver {
-  private static readonly includeRegex = /\s*#Include(?:|(?<mode>Again))\s+(?:|(?<optional>[*]i)\s+)(?:(?<includePath>[^*\s<>]+)|<(?<libraryPath>[^*\s<>]+)>)\s*/iu;
+  private static readonly includeRegex = /^\s*#Include(?:|(?<mode>Again))\s+(?:|(?<optional>[*]i)\s+)(?:(?<includePath>[^*\s<>]+)|<(?<libraryPath>[^*\s<>]+)>)\s*/iu;
   public readonly conversionTable: SupportVariables;
   public readonly config: AdditionalInfo;
   constructor(config: AdditionalInfo) {
@@ -366,7 +366,7 @@ export default class Resolver {
       accessSync(targetPath);
 
       const sourceCode = readFileSync(targetPath, 'utf8');
-      const includeRegex = new RegExp(Resolver.includeRegex.source, 'gui');
+      const includeRegex = new RegExp(Resolver.includeRegex.source, 'guim');
       Array.from(sourceCode.matchAll(includeRegex), (x) => x[0]).forEach((includeLine) => {
         const filePath = this.resolveByIncludeLine(includeLine);
         if (filePath) {
