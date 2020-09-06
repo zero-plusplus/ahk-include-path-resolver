@@ -16,6 +16,7 @@ module.exports = {
   plugins: [ "@typescript-eslint" ],
   rules: {
   ...rules,
+    'no-plusplus': 'off',
     'no-shadow': 'off',
     '@typescript-eslint/no-non-null-assertion': 'off',
   }

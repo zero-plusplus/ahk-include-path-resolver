@@ -1,7 +1,8 @@
 import { accessSync, readFileSync } from 'fs';
 import * as path from 'path';
 import { readDirDeepSync } from 'read-dir-deep';
-import { unique } from 'underscore';
+import insensitiveUniq from '../src/util/insensitiveUniq';
+
 /**
  * Library folder type.
  * @see https://www.autohotkey.com/docs/Functions.htm#lib
@@ -391,6 +392,6 @@ export default class Resolver {
     catch (error) {
     }
 
-    return unique(includePathList);
+    return insensitiveUniq(includePathList);
   }
 }
