@@ -18,6 +18,7 @@ module.exports = {
   ...rules,
     'no-plusplus': 'off',
     'no-shadow': 'off',
+    'no-underscore-dangle': 'off',
     '@typescript-eslint/no-non-null-assertion': 'off',
   }
 }

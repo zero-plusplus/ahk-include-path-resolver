@@ -168,8 +168,11 @@ suite('Parse include line', () => {
       const expected = [
         path.resolve(`${__dirname}/ahk/lib/LocalLib.ahk`),
         path.resolve(`${__dirname}/ahk/lib/LocalLibClass.ahk`),
+        path.resolve(`${__dirname}/ahk/lib/nestlib/NestFolderLib.ahk`),
+        path.resolve(`${__dirname}/ahk/lib/nestlib/NestFolderLib2.ahk`),
         path.resolve(`${__dirname}/ahk/lib/NestLib.ahk`),
         path.resolve(`${__dirname}/ahk/otherscript.ahk`),
+        path.resolve(`${__dirname}/ahk/otherscript2.ahk`),
       ].sort(sortCallback);
       assert.deepEqual(actual, expected);
     });

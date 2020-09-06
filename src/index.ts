@@ -1,4 +1,4 @@
-import { accessSync, readFileSync } from 'fs';
+import { accessSync, readFileSync, statSync } from 'fs';
 import * as path from 'path';
 import { readDirDeepSync } from 'read-dir-deep';
 import insensitiveUniq from '../src/util/insensitiveUniq';
@@ -211,7 +211,8 @@ export default class Resolver {
   public readonly conversionTable: SupportVariables;
   public readonly config: AdditionalInfo;
   constructor(config: AdditionalInfo) {
-    const { runtimePath, overwrite, rootPath, currentPath } = config;
+    const { runtimePath, overwrite, currentPath } = config;
+    const rootPath = path.resolve(config.rootPath);
 
     this.conversionTable = {
       ...defaultConversionTable,
@@ -232,24 +233,18 @@ export default class Resolver {
     } as AdditionalInfo;
   }
   public getLibraryPathList(libraryType: LibraryType): string[] {
-    const libraryPathList: string[] = [];
-
     const libraryDirPath = this.getLibraryDir(libraryType);
     try {
       accessSync(libraryDirPath);
 
-      const files = readDirDeepSync(libraryDirPath);
-      files.flat(10)
+      return readDirDeepSync(libraryDirPath)
         .map((filePath) => path.resolve(filePath))
-        .filter((filePath) => path.extname(filePath) === '.ahk')
-        .forEach((filePath) => {
-          libraryPathList.push(filePath);
-        });
+        .filter((filePath) => path.extname(filePath) === '.ahk');
     }
     catch (error) {
     }
 
-    return libraryPathList;
+    return [];
   }
   /**
    * Get the library folder.
@@ -288,46 +283,47 @@ export default class Resolver {
    * Resolve so that the path that can be specified by `#Include` can be handled in JavaScript.
    * @param includePath For example: '%A_LineFile%\..\otherscript.ahk'
    */
-  public resolve(includePath: string): string | null {
+  public resolve(includePath: string, currentDir?: string): string | null {
     let resolvedPath = includePath;
 
-    if (resolvedPath.includes('%')) {
-      for (const variableName in this.conversionTable) {
-        if (!Object.prototype.hasOwnProperty.call(this.conversionTable, variableName)) {
-          continue;
-        }
-
-        const dereferencedValue = this.dereference(variableName);
-        if (dereferencedValue === null) {
-          continue;
-        }
+    Array.from(resolvedPath.matchAll(/(?:%(?<variableName>[\w_]+)%)/gui)).forEach((match) => {
+      const variableName = match.groups!.variableName;
+      const dereferencedValue = this.dereference(variableName);
+      if (dereferencedValue) {
         resolvedPath = resolvedPath.replace(new RegExp(`(%${variableName}%)`, 'uig'), dereferencedValue);
       }
+    });
+
+    if (path.isAbsolute(resolvedPath)) {
+      return path.resolve(resolvedPath);
     }
 
-    const isRelativePath = !resolvedPath.match(/[a-z]:/ui);
-    if (isRelativePath) {
-      const baseDir = this.conversionTable.A_ScriptDir;
-      if (resolvedPath.startsWith('..') || !resolvedPath.startsWith('.')) {
-        resolvedPath = `${baseDir}/${resolvedPath}`;
-      }
-      else {
-        resolvedPath = resolvedPath.replace('.', baseDir);
-      }
+    let _currentDir: string;
+    if (this.config.version === 2) {
+      _currentDir = currentDir ?? this.conversionTable.A_LineFile;
+    }
+    else {
+      _currentDir = currentDir ?? this.conversionTable.A_ScriptDir;
     }
 
-    return path.resolve(resolvedPath);
+    if (resolvedPath.startsWith('..')) {
+      return path.resolve(`${_currentDir}/${resolvedPath}`); // ..\relativePath -> currentDir\..\relativePath
+    }
+    else if (resolvedPath.startsWith('.')) {
+      return path.resolve(resolvedPath.replace('.', _currentDir)); // .\relativePath -> currentDir\relativePath
+    }
+    return path.resolve(`${_currentDir}/${resolvedPath}`); // relativePath -> currentDir\relativePath
   }
   /**
    * Extract the path from the compilable "#Include" line and resolve.
    * @param includeLine The path where the AutoHotkey built-in variables are embedded. For example: `%A_LineFile%\..\OtherScrpit.ahk`
    */
-  public resolveByIncludeLine(includeLine: string): string | null {
+  public resolveByIncludeLine(includeLine: string, currentDir?: string): string | null {
     const parsedInclude = this.parseInclude(includeLine);
     if (!parsedInclude) {
       return null;
     }
-    return this.resolve(parsedInclude.path);
+    return this.resolve(parsedInclude.path, currentDir);
   }
   public parseInclude(includeLine: string): ParsedInclude | null {
     const match = Resolver.includeRegex.exec(includeLine);
@@ -353,7 +349,7 @@ export default class Resolver {
   /**
    * @param libraryTypes
    */
-  public extractAllIncludePath(libraryTypes: LibraryType[], _filePath = '', _libraryPathList: string[] = []): string[] {
+  public extractAllIncludePath(libraryTypes: LibraryType[], _filePath = '', _libraryPathList: string[] = [], _currentDir?: string): string[] {
     const includePathList: string[] = [];
 
     if (_filePath === '') {
@@ -363,25 +359,37 @@ export default class Resolver {
     }
 
     const targetPath = path.resolve(_filePath || this.config.rootPath);
+    let currentDir = _currentDir ?? this.conversionTable.A_ScriptDir;
     try {
       accessSync(targetPath);
 
       const sourceCode = readFileSync(targetPath, 'utf8');
       const includeRegex = new RegExp(Resolver.includeRegex.source, 'guim');
       Array.from(sourceCode.matchAll(includeRegex), (x) => x[0]).forEach((includeLine) => {
-        const filePath = this.resolveByIncludeLine(includeLine);
-        if (filePath) {
+        const fileOrDirPath = this.resolveByIncludeLine(includeLine, currentDir);
+        if (!fileOrDirPath) {
+          throw Error('File not found.');
+        }
+
+        const stats = statSync(fileOrDirPath);
+        if (stats.isDirectory()) {
+          currentDir = fileOrDirPath;
+        }
+        else {
+          const filePath = fileOrDirPath;
           includePathList.push(filePath);
 
           const resolve = new Resolver({
             ...this.config,
             currentPath: filePath,
           });
-          includePathList.push(...resolve.extractAllIncludePath(libraryTypes, filePath, _libraryPathList));
+          includePathList.push(...resolve.extractAllIncludePath(libraryTypes, filePath, _libraryPathList, currentDir));
         }
       });
 
       _libraryPathList.forEach((libraryPath) => {
+        const nameRule = this.config.version === 2 ? '[\\w_]+' : '[\\w_$@#]+';
+        libraryPath.match(new RegExp(`lib\\\\(?<funcName>${nameRule})\\.ahk`, 'ui'));
         const funcName = path.basename(libraryPath).split('.')[0];
         const regex = new RegExp(`${funcName}(?:|_[^\\(\\)]+)\\(.*\\)`, 'ui');
         if (regex.test(sourceCode)) {

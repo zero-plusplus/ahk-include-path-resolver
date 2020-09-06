@@ -1,2 +1,1 @@
-﻿otherscript() {
-}
+﻿MsgBox otherscript
