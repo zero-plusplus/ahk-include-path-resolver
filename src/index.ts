@@ -90,7 +90,7 @@ interface SupportVariables {
    *
    * The full path and name of the file to which A_LineNumber belongs, which will be the same as A_ScriptFullPath unless the line belongs to one of a non-compiled script's #Include files.
    */
-  readonly A_LineFile: string | null;
+  readonly A_LineFile: string;
   /**
    * The full path and name of the current user's "My Documents" folder. Unlike most of the similar variables, if the folder is the root of a drive, the final backslash is not included (e.g. it would contain M: rather than M:\). For example: `C:\Users\<UserName>\Documents`
    */
@@ -184,7 +184,7 @@ const defaultConversionTable: SupportVariables = {
   A_ComSpec: String(process.env.ComSpec),
   A_Desktop: `${String(process.env.USERPROFILE)}\\Desktop`,
   A_DesktopCommon: `${String(process.env.PUBLIC)}\\Desktop`,
-  A_LineFile: null,
+  A_LineFile: '',
   A_MyDocuments: `${String(process.env.USERPROFILE)}\\Documents`,
   A_ProgramFiles: String(process.env.ProgramFiles),
   A_Programs: `${String(process.env.APPDATA)}\\Microsoft\\Windows\\Start Menu\\Programs`,
