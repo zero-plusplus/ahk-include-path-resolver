@@ -19,6 +19,7 @@ module.exports = {
     'no-plusplus': 'off',
     'no-shadow': 'off',
     'no-underscore-dangle': 'off',
+    'no-unused-expressions': 'off',
     '@typescript-eslint/no-non-null-assertion': 'off',
   }
 }

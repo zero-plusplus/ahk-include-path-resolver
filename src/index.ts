@@ -346,48 +346,49 @@ export default class Resolver {
     } as ParsedInclude;
     return parsedInclude;
   }
-  /**
-   * @param libraryTypes
-   */
-  public extractAllIncludePath(libraryTypes: LibraryType[], _filePath = '', _libraryPathList: string[] = [], _currentDir?: string): string[] {
+  public extractAllIncludePath(libraryTypes: LibraryType[], recursiveInfo: { filePath?: string; libraryPathList?: string[]; currentDir?: string } = {}): string[] {
     const includePathList: string[] = [];
 
-    if (_filePath === '') {
+    if (!recursiveInfo.currentDir) {
       libraryTypes.forEach((libraryType) => {
-        _libraryPathList.push(...this.getLibraryPathList(libraryType));
+        recursiveInfo.libraryPathList = this.getLibraryPathList(libraryType);
       });
     }
 
-    const targetPath = path.resolve(_filePath || this.config.rootPath);
-    let currentDir = _currentDir ?? this.conversionTable.A_ScriptDir;
+    const targetPath = path.resolve(recursiveInfo.filePath ?? this.config.rootPath);
     try {
       accessSync(targetPath);
 
       const sourceCode = readFileSync(targetPath, 'utf8');
       const includeRegex = new RegExp(Resolver.includeRegex.source, 'guim');
-      Array.from(sourceCode.matchAll(includeRegex), (x) => x[0]).forEach((includeLine) => {
-        const fileOrDirPath = this.resolveByIncludeLine(includeLine, currentDir);
+
+      for (const match of sourceCode.matchAll(includeRegex)) {
+        const includeLine = match[0];
+        const fileOrDirPath = this.resolveByIncludeLine(includeLine, recursiveInfo.currentDir);
         if (!fileOrDirPath) {
           throw Error('File not found.');
         }
 
         const stats = statSync(fileOrDirPath);
         if (stats.isDirectory()) {
-          currentDir = fileOrDirPath;
+          recursiveInfo.currentDir = fileOrDirPath;
+          continue;
         }
         else {
           const filePath = fileOrDirPath;
+          recursiveInfo.filePath = filePath;
           includePathList.push(filePath);
 
           const resolve = new Resolver({
             ...this.config,
             currentPath: filePath,
           });
-          includePathList.push(...resolve.extractAllIncludePath(libraryTypes, filePath, _libraryPathList, currentDir));
-        }
-      });
 
-      _libraryPathList.forEach((libraryPath) => {
+          includePathList.push(...resolve.extractAllIncludePath(libraryTypes, recursiveInfo));
+        }
+      }
+
+      recursiveInfo.libraryPathList?.forEach((libraryPath) => {
         const nameRule = this.config.version === 2 ? '[\\w_]+' : '[\\w_$@#]+';
         libraryPath.match(new RegExp(`lib\\\\(?<funcName>${nameRule})\\.ahk`, 'ui'));
         const funcName = path.basename(libraryPath).split('.')[0];

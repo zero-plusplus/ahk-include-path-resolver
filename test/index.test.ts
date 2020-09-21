@@ -73,7 +73,7 @@ suite('Parse include line', () => {
   suite('For AutoHotkey v1', () => {
     const resolver_v1 = new Resolver({
       runtimePath: `${String(process.env.ProgramFiles)}/AutoHotkey/AutoHotkey.exe`,
-      rootPath: `${__dirname}/ahk/LibrariesOfFunction.ahk`,
+      rootPath: `${__dirname}/test-a/ahk/LibrariesOfFunction.ahk`,
       version: 1,
     });
     test('include line', () => {
@@ -159,20 +159,36 @@ suite('Parse include line', () => {
     test('v1', () => {
       const resolver_v1 = new Resolver({
         runtimePath: `${String(process.env.ProgramFiles)}/AutoHotkey/AutoHotkey.exe`,
-        rootPath: `${__dirname}/ahk/main.ahk`,
+        rootPath: `${__dirname}/ahk/test-a/main.ahk`,
         version: 1,
       });
 
       const sortCallback = (a: string, b: string): number => a.localeCompare(b);
       const actual = resolver_v1.extractAllIncludePath([ 'local' ]).sort(sortCallback);
       const expected = [
-        path.resolve(`${__dirname}/ahk/lib/LocalLib.ahk`),
-        path.resolve(`${__dirname}/ahk/lib/LocalLibClass.ahk`),
-        path.resolve(`${__dirname}/ahk/lib/nestlib/NestFolderLib.ahk`),
-        path.resolve(`${__dirname}/ahk/lib/nestlib/NestFolderLib2.ahk`),
-        path.resolve(`${__dirname}/ahk/lib/NestLib.ahk`),
-        path.resolve(`${__dirname}/ahk/otherscript.ahk`),
-        path.resolve(`${__dirname}/ahk/otherscript2.ahk`),
+        path.resolve(`${__dirname}/ahk/test-a/lib/LocalLib.ahk`),
+        path.resolve(`${__dirname}/ahk/test-a/lib/LocalLibClass.ahk`),
+        path.resolve(`${__dirname}/ahk/test-a/lib/nestlib/NestFolderLib.ahk`),
+        path.resolve(`${__dirname}/ahk/test-a/lib/nestlib/NestFolderLib2.ahk`),
+        path.resolve(`${__dirname}/ahk/test-a/lib/NestLib.ahk`),
+        path.resolve(`${__dirname}/ahk/test-a/otherscript.ahk`),
+        path.resolve(`${__dirname}/ahk/test-a/otherscript2.ahk`),
+      ].sort(sortCallback);
+      assert.deepEqual(actual, expected);
+    });
+    test('v1 pattern 2', () => {
+      const resolver_v1 = new Resolver({
+        runtimePath: `${String(process.env.ProgramFiles)}/AutoHotkey/AutoHotkey.exe`,
+        rootPath: `${__dirname}/ahk/test-b/main.ahk`,
+        version: 1,
+      });
+
+      const sortCallback = (a: string, b: string): number => a.localeCompare(b);
+      const actual = resolver_v1.extractAllIncludePath([ 'local' ]).sort(sortCallback);
+      const expected = [
+        path.resolve(`${__dirname}/ahk/test-b/lib/c.ahk`),
+        path.resolve(`${__dirname}/ahk/test-b/module/a.ahk`),
+        path.resolve(`${__dirname}/ahk/test-b/module/b.ahk`),
       ].sort(sortCallback);
       assert.deepEqual(actual, expected);
     });
